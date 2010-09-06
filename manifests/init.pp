@@ -15,6 +15,8 @@ class xen {
   }
 
   define domain($ip, $domain = "$xen_domain_default_domain", $size = "$xen_domain_default_size", $memory = "$xen_domain_default_memory", $swap = "$xen_domain_default_memory", $role = "$xen_default_domain_role") {
+    include xen
+
     $hostname = $domain ? {
       '' => $name,
       default => "$name.$domain"
