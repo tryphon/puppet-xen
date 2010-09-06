@@ -1,11 +1,5 @@
 class xen {
 
-  $xen_domain_default_domain=''
-  $xen_domain_default_size='1G'
-  $xen_domain_default_memory='256M'
-  $xen_domain_default_swap='128M'
-  $xen_domain_default_role=''
-
   package { xen-tools: }
 
   # should be created by xen system
@@ -14,7 +8,7 @@ class xen {
     require => Package[xen-tools]
   }
 
-  define domain($ip, $domain = "$xen_domain_default_domain", $size = "$xen_domain_default_size", $memory = "$xen_domain_default_memory", $swap = "$xen_domain_default_memory", $role = "$xen_default_domain_role") {
+  define domain($ip, $domain = '', $size = "1G", $memory = "256M", $swap = "128M", $role = "puppet") {
     include xen
 
     $hostname = $domain ? {
