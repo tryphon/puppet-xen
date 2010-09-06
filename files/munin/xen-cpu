@@ -69,7 +69,7 @@ if ( defined($ARGV[0]) )
 	{
 		my %cnf;
 		%cnf = (
-			'graph_title' => 'Xen Domain CPU Usage v2',
+			'graph_title' => 'Xen Domain CPU Usage',
 			'graph_args' => '--base 1000 -l 0 --upper-limit 100 --rigid',
 			'graph_vlabel' => 'Percent (%)',
 			'graph_category' => 'xen',
@@ -122,7 +122,11 @@ if ( -e $TEMPFILE )
 	{
 		# Get the guest name and its CPU usage, and store it in $dom
 		$_ =~ /(\S+)\s+\S+\s+\S+\s+\d+\s+\S+\s+(\S+)/;
-		$dom{$1}->{'oldtime'} = $2;
+
+    my $key = $1; my $value = $2;
+    $key =~ s/[-.]/_/g;
+
+		$dom{$key}->{'oldtime'} = $value;
 	}
 	
 	close FH;
@@ -133,18 +137,22 @@ foreach my $domain ( @xmlist )
 {
 	# Get the domains' name and current CPU usage, store it in $dom
 	$domain =~ /(\S+)\s+\S+\s+\S+\s+\d+\s+\S+\s+(\S+)/;
-	$dom{$1}->{'newtime'} = $2;
 
-	$diff = $dom{$1}->{'newtime'} - $dom{$1}->{'oldtime'};
+  my $key = $1; my $value = $2;
+
+  $key =~ s/[-.]/_/g;
+	$dom{$key}->{'newtime'} = $value;
+
+	$diff = $dom{$key}->{'newtime'} - $dom{$key}->{'oldtime'};
 	$diff = sprintf("%.2f", $diff);
 	
 	# Calc the diff between old and new cputime, or reset the counter
 	if ( $diff < 0 )
 	{
-		$diff = $dom{$1}->{'newtime'};
+		$diff = $dom{$key}->{'newtime'};
 	}
-	$dom{$1}->{'diff'} = $diff;
-	
+	$dom{$key}->{'diff'} = $diff;
+
 	# Calc a sum CPU usage
 	$cpusum = $cpusum + $diff;
 }
