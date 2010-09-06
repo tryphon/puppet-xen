@@ -35,6 +35,7 @@ class xen {
 class xen::munin::plugins {
   include xen::munin::plugin::cpu
   include xen::munin::plugin::memory
+  include xen::munin::plugin::traffic-all
 }
 
 class xen::munin::plugin::cpu {
@@ -51,6 +52,15 @@ class xen::munin::plugin::memory {
 
   munin::plugin { xen-memory:
     source => "puppet:///xen/munin/xen-memory",
+    config => "user root"
+  }
+}
+
+class xen::munin::plugin::traffic-all {
+  include munin
+
+  munin::plugin { xen-traffic-all:
+    source => "puppet:///xen/munin/xen-traffic-all",
     config => "user root"
   }
 }
