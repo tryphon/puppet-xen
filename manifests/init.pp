@@ -1,14 +1,24 @@
 class xen {
 
+  $xen_domain_default_domain=''
+  $xen_domain_default_size='1G'
+  $xen_domain_default_memory='256M'
+  $xen_domain_default_swap='128M'
+  $xen_domain_default_role=''
+
   package { xen-tools: }
 
   # should be created by xen system
   file { ["/etc/xen/auto", "/etc/xen"]:
-    ensure => directory
+    ensure => directory,
+    require => Package[xen-tools]
   }
 
-  define domain($domain, $ip, $size = '1G', $memory = '256M', $swap = '128M', $role = '') {
-    $hostname = "$name.$domain"
+  define domain($ip, $domain = "$xen_domain_default_domain", $size = "$xen_domain_default_size", $memory = "$xen_domain_default_memory", $swap = "$xen_domain_default_memory", $role = "$xen_default_domain_role") {
+    $hostname = $domain ? {
+      '' => $name,
+      default => "$name.$domain"
+    }
 
     exec { "create-xen-$name":
       command => "xen-create-image --size $size --swap $swap --memory $memory --hostname $hostname --ip $ip --role=$role",
@@ -24,6 +34,10 @@ class xen {
 
   }
 
+}
+
+class xen::munin::plugins {
+  include xen::munin::plugin::cpu
 }
 
 class xen::munin::plugin::cpu {
