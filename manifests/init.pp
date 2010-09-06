@@ -34,6 +34,7 @@ class xen {
 
 class xen::munin::plugins {
   include xen::munin::plugin::cpu
+  include xen::munin::plugin::memory
 }
 
 class xen::munin::plugin::cpu {
