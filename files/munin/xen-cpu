@@ -29,7 +29,7 @@ my $XM = '/usr/sbin/xm';
 my $XMTOP = '/usr/sbin/xentop';
 my $curtime = time();
 my $basename = `/usr/bin/basename $0`; chop ($basename);
-my $TEMPFILE = "/tmp/$basename";
+my $TEMPFILE = "/var/lib/munin/plugin-state/$basename";
 
 my $debug = 0;
 
