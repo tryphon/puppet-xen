@@ -29,15 +29,17 @@ class xen {
 class xen::munin::plugin::cpu {
   include munin
 
-  file { "/usr/local/share/munin/plugins/xen-cpu":
-    source => "puppet:///xen/munin/xen-cpu",
-    mode => 755,
-    require => Package[xen-tools]
-  }
   munin::plugin { xen-cpu:
-    script_path => "/usr/local/share/munin/plugins",
-    config => "user root",
-    require => File["/usr/local/share/munin/plugins/xen-cpu"]
+    source => "puppet:///xen/munin/xen-cpu",
+    config => "user root"
   }
+}
 
+class xen::munin::plugin::memory {
+  include munin
+
+  munin::plugin { xen-memory:
+    source => "puppet:///xen/munin/xen-memory",
+    config => "user root"
+  }
 }
