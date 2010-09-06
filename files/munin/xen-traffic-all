@@ -28,7 +28,7 @@ if [ "$1" = "config" ]; then
     echo 'graph_category xen'
     DOMAINS=$(xm list | awk '{print $1}' | egrep -v "^(Name|Domain-0)")
     for dom in $DOMAINS; do
-        name=$( echo $dom | sed -e's/-/_/g' )
+        name=$(echo $dom | sed -e's/\.-/_/g')
         #echo $name"UP.label $name"
         #echo $name"DOWN.label $name"
 
