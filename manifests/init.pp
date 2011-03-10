@@ -8,7 +8,7 @@ class xen {
     require => Package[xen-tools]
   }
 
-  define domain($ip, $domain = '', $size = "1G", $memory = "256M", $swap = "128M", $role = "puppet") {
+  define domain($ip, $domain = '', $size = "1G", $memory = "256M", $swap = "128M", $role = "puppet", $vifname = false, $mac = false) {
     include xen
 
     $hostname = $domain ? {
@@ -16,8 +16,17 @@ class xen {
       default => "$name.$domain"
     }
 
+    $vifname_option = $vifname ? {
+      false => '',
+      default => "--vifname=$vifname"
+    }
+    $mac_option = $mac ? {
+      false => '',
+      default => "--mac=$mac"
+    }
+
     exec { "create-xen-$name":
-      command => "xen-create-image --size $size --swap $swap --memory $memory --hostname $hostname --ip $ip --role=$role",
+      command => "xen-create-image --size $size --swap $swap --memory $memory --hostname $hostname --ip $ip --role=$role $vifname_option $mac_option",
       creates => "/etc/xen/$hostname.cfg",
       timeout => 600,
       require => Package["xen-tools"]
