@@ -1,0 +1,20 @@
+#!/bin/sh
+
+network=$1
+index=$2
+
+case $network in 
+    loc)
+        network_number=10
+        ;;
+    dmz)
+        network_number=20
+        ;;
+    *)
+        echo "invalid network: $network"
+        exit 1
+esac
+
+index_number=`printf %02d $index`
+
+echo -n "00:16:3E:66:$network_number:$index_number"
