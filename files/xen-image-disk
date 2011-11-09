@@ -1,0 +1,134 @@
+#!/usr/bin/env ruby
+
+# Manage disk definition in a xen configuration file
+#
+# $ xen-image-disk list /etc/xen/mail.dbx.tryphon.priv.cfg 
+#
+# phy:/dev/vg/mail.dbx.tryphon.priv-swap,sda1,w
+# phy:/dev/vg/mail.dbx.tryphon.priv-disk,sda2,w
+#
+# $ xen-image-disk add /etc/xen/mail.dbx.tryphon.priv \
+#   phy:/dev/vg/mail.dbx.tryphon.priv-mail,sda3,w
+#         
+# $ xen-image-disk list /etc/xen/mail.dbx.tryphon.priv.cfg 
+#
+# phy:/dev/vg/mail.dbx.tryphon.priv-swap,sda1,w
+# phy:/dev/vg/mail.dbx.tryphon.priv-disk,sda2,w
+# phy:/dev/vg/mail.dbx.tryphon.priv-mail,sda3,w                               
+#
+# $ diff mail.dbx.tryphon.priv.cfg*
+# 17,20c17,19                     
+# < disk        = [
+# <                   'phy:/dev/vg/mail.dbx.tryphon.priv-swap,sda1,w',
+# <                   'phy:/dev/vg/mail.dbx.tryphon.priv-disk,sda2,w',
+# <               ]
+# ---
+# > disk = [ 'phy:/dev/vg/mail.dbx.tryphon.priv-swap,sda1,w',
+# >          'phy:/dev/vg/mail.dbx.tryphon.priv-disk,sda2,w',
+# >          'phy:/dev/vg/mail.dbx.tryphon.priv-mail,sda3,w' ]
+
+class XenDiskConfiguration
+
+  @@disk_regexp = /disk\s*=\s*\[([^\]]*)\]/m
+
+  attr_accessor :disks
+
+  def initialize(configuration_file)
+    @configuration_file = configuration_file 
+    load
+  end
+
+  def add(definition)
+    return if include? definition
+
+    unless definition =~ /^phy:/
+      definition = "phy:#{definition},#{free_device},w"
+    end
+    disks << definition 
+  end
+
+  def remove(definition)
+    disk_definition = find(definition)
+    disks.delete disk_definition if disk_definition
+  end
+
+  def load
+    @disks = 
+      if IO.read(@configuration_file) =~ @@disk_regexp
+        $1.scan(/'(.*)'/).flatten
+      else
+        raise "no disk definition found in #{@configuration_file}"
+      end
+  end
+
+  def save
+    prefix = "disk = [ "
+    new_disk_configuration = prefix + 
+      disks.collect { |d| "'#{d}'" }.join(",\n"+" "*prefix.size) + 
+      " ]"
+
+    new_configuration = 
+      IO.read(@configuration_file).gsub(@@disk_regexp,new_disk_configuration)
+
+    File.open(@configuration_file,'w') do |f|
+      f.puts new_configuration
+    end
+  end
+
+  def free_device
+    free_device_id = ((1..20).to_a - used_device_ids).first
+    "#{device_basename}#{free_device_id}"
+  end
+
+  def include?(definition)
+    not find(definition).nil?
+  end
+
+  def find(definition)
+    disks.find do |disk_definition|
+      disk_definition == definition or
+        disk_definition.match(/^phy:#{definition},/)
+    end
+  end
+
+  def device_basename
+    disks.first =~ /,(xvd|sd)([a-z])[0-9+],/
+    $1 + $2
+  end
+
+  private
+
+  def used_device_ids
+    disks.collect do |disk_definition|
+      disk_definition =~ /,(xvd|sd)[a-z]([0-9+]),/
+      $2.to_i
+    end
+  end
+
+end
+
+command = ARGV.shift
+configuration = XenDiskConfiguration.new(ARGV.shift)
+
+case command
+when 'list'
+  puts configuration.device_basename
+  puts configuration.disks
+when 'add'
+  configuration.add ARGV.shift
+  configuration.save
+when 'remove'
+  configuration.remove ARGV.shift
+  configuration.save
+when 'check'
+  if configuration.include? ARGV.shift
+    puts "found"
+    exit 0
+  else
+    puts "not found"
+    exit 1
+  end
+else
+  $stderr.puts "unknown command"
+  exit 1
+end
