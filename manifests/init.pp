@@ -2,7 +2,7 @@ class xen {
 
   if $debian::lenny {
     package { "xen-utils-3.2-1": }
-    package { "xen-linux-system-2.6.26-2-xen-amd64":
+    package { "xen-linux-system-2.6.26-2-xen-amd64": 
       alias => "xen-linux-system"
     }
   } else {
@@ -18,7 +18,7 @@ class xen {
     }
   }
 
-  package { xen-utils-common:
+  package { xen-utils-common: 
     # provides /etc/xen/scripts
   }
 
@@ -34,8 +34,8 @@ class xen {
     require => Exec["check-xen-kernel"]
   }
 
-  file { "/usr/local/sbin/xen-image-disk":
-    source => ["puppet:///files/xen/xen-tools.conf.$fqdn", "puppet:///xen/xen-image-disk"],
+  file { "/usr/local/sbin/xen-image-disk": 
+    source => "puppet:///xen/xen-image-disk",
     mode => 755
   }
 
@@ -174,8 +174,8 @@ class xen::network::dmzloc {
   }
 
   file { "/etc/xen/scripts/network-custom":
-    content => '#!/bin/sh
-dir=/etc/xen/scripts
+    content => '#!/bin/sh 
+dir=/etc/xen/scripts 
 logger -t "network-custom" -i "Configure route for eth0"
 $dir/network-route "$@" netdev=eth0
 logger -t "network-custom" -i "Configure bridge for dummy0"
@@ -186,7 +186,7 @@ $dir/network-bridge "$@" netdev=dummy0
   }
 
   file { "/etc/xen/scripts/vif-custom":
-    content => '#!/bin/sh
+    content => '#!/bin/sh 
 dir=/etc/xen/scripts
 IFNUM=$(echo ${vif} | cut -d. -f2)
 logger -t "vif-custom" -i "vif=$vif, ifnum=$IFNUM $@"
