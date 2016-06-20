@@ -35,7 +35,7 @@ class xen {
   }
 
   file { "/usr/local/sbin/xen-image-disk": 
-    source => "puppet:///xen/xen-image-disk",
+    source => "puppet:///modules/xen/xen-image-disk",
     mode => 755
   }
 
@@ -99,7 +99,7 @@ class xen {
 
 class xen::puppetmaster {
   file { "/usr/local/bin/xen-generate-mac":
-    source => "puppet:///xen/xen-generate-mac",
+    source => "puppet:///modules/xen/xen-generate-mac",
     mode => 755
   }
 }
@@ -114,7 +114,7 @@ class xen::munin::plugin::cpu {
   include munin
 
   munin::plugin { xen-cpu:
-    source => "puppet:///xen/munin/xen-cpu",
+    source => "puppet:///modules/xen/munin/xen-cpu",
     config => "user root"
   }
 }
@@ -123,7 +123,7 @@ class xen::munin::plugin::memory {
   include munin
 
   munin::plugin { xen-memory:
-    source => "puppet:///xen/munin/xen-memory",
+    source => "puppet:///modules/xen/munin/xen-memory",
     config => "user root"
   }
 }
@@ -132,7 +132,7 @@ class xen::munin::plugin::traffic-all {
   include munin
 
   munin::plugin { xen-traffic-all:
-    source => "puppet:///xen/munin/xen-traffic-all",
+    source => "puppet:///modules/xen/munin/xen-traffic-all",
     config => "user root"
   }
 }
